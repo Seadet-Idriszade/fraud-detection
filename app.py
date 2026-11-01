@@ -12,83 +12,184 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enterprise Dark Minimalist Stil
+# Canlı kiber-radar və aurora vizual dizaynı
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
+    /* Dərin kiber arxa fon */
     .stApp {
-        background-color: #0b0f19;
-        color: #f1f5f9;
+        background-color: #060913 !important;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+            radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%) !important;
+        overflow-x: hidden;
     }
 
-    h1, h2, h3, h4 {
-        font-weight: 800 !important;
-        letter-spacing: -0.02em !important;
-        color: #f8fafc !important;
+    /* Arxa fonda üzən canlı neon dumanlar (Aurora effekti) */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: -100px;
+        left: -100px;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+        filter: blur(90px);
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+        animation: floatOrb 20s ease-in-out infinite alternate;
     }
 
-    /* Metrik kartları */
+    .stApp::after {
+        content: "";
+        position: fixed;
+        bottom: -120px;
+        right: -100px;
+        width: 550px;
+        height: 550px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.16), transparent 70%);
+        filter: blur(100px);
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+        animation: floatOrb 25s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes floatOrb {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(80px, 50px) scale(1.1); }
+        100% { transform: translate(-40px, 90px) scale(0.95); }
+    }
+
+    /* Buzlu şüşə (Glassmorphism) kartlar və hover animasiyası */
+    .custom-card, div[data-testid="stMetric"], .stExpander, div[data-testid="stDataFrame"] {
+        background: rgba(13, 20, 36, 0.65) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s, box-shadow 0.3s !important;
+    }
+
+    .custom-card:hover, div[data-testid="stMetric"]:hover {
+        border-color: rgba(56, 189, 248, 0.35) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 14px 34px -8px rgba(56, 189, 248, 0.15) !important;
+    }
+
+    /* Qradiyent axan başlıq */
+    .radar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+        margin-top: -15px;
+    }
+
+    .radar-title {
+        font-size: 2.3rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(120deg, #ffffff 15%, #38bdf8 55%, #a855f7 90%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shine 8s linear infinite;
+    }
+
+    @keyframes shine {
+        to { background-position: 200% center; }
+    }
+
+    /* Nəbz vuran radar işığı */
+    .radar-dot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(56, 189, 248, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+
+    /* Metrik rəqəmləri */
     div[data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         font-weight: 700 !important;
-        font-size: 2rem !important;
+        font-size: 1.9rem !important;
+        color: #f8fafc !important;
     }
 
-    /* Tablar */
+    /* Modern tablar */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: transparent;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-bottom: 4px;
+        padding-bottom: 6px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 42px;
-        border-radius: 6px;
-        padding: 0 16px;
+        height: 44px;
+        border-radius: 8px;
+        padding: 0 18px;
         color: #94a3b8;
         font-weight: 600;
         font-size: 0.92rem;
-        background-color: transparent;
-        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.25s ease;
     }
     .stTabs [aria-selected="true"] {
-        background-color: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(56, 189, 248, 0.1) !important;
         color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.2) !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.15) !important;
     }
 
-    /* Kart qutuları */
-    .custom-card {
-        background: rgba(255, 255, 255, 0.025);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 14px;
-    }
-
+    /* Status nişanları */
     .badge {
         display: inline-block;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 0.75rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.78rem;
         font-weight: 700;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
     }
-    .badge-danger { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
-    .badge-warning { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-    .badge-success { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-danger { 
+        background: rgba(244, 63, 94, 0.15); 
+        color: #fb7185; 
+        border: 1px solid rgba(244, 63, 94, 0.4);
+        box-shadow: 0 0 16px rgba(244, 63, 94, 0.2); 
+    }
+    .badge-warning { 
+        background: rgba(251, 191, 36, 0.15); 
+        color: #fcd34d; 
+        border: 1px solid rgba(251, 191, 36, 0.4); 
+    }
+    .badge-success { 
+        background: rgba(52, 211, 153, 0.15); 
+        color: #6ee7b7; 
+        border: 1px solid rgba(52, 211, 153, 0.4); 
+    }
 
-    /* Düymələr */
+    /* Giriş sahələri və düymələr */
     .stButton>button {
+        border-radius: 8px;
         font-weight: 600;
-        border-radius: 6px;
-        letter-spacing: -0.01em;
+        transition: all 0.25s ease;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -183,8 +284,13 @@ def describe(feature):
     return f"{LABELS.get(feature, (feature,))[0]}"
 
 
-# Başlıq
-st.title("Sığorta fraud radar")
+# Başlıq bloku
+st.markdown("""
+<div class="radar-header">
+    <div class="radar-dot"></div>
+    <div class="radar-title">Sığorta fraud radar</div>
+</div>
+""", unsafe_allow_html=True)
 st.caption("Maşın öyrənməsi əsaslı sığorta fırıldaqçılığı aşkarlama və qərar dəstək sistemi.")
 
 tabs = st.tabs([
@@ -204,7 +310,7 @@ with tabs[0]:
     b1.button("Tipik normal profil", on_click=apply_preset, args=("normal",), use_container_width=True)
     b2.button("Şübhəli profil", on_click=apply_preset, args=("suspicious",), use_container_width=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
     left, right = st.columns([1.1, 0.9], gap="large")
 
@@ -230,10 +336,10 @@ with tabs[0]:
             points = round(score * 100)
             limit = round(base_threshold * 100)
 
-            # Risk statusu
+            # Status badge
             if score >= base_threshold:
                 badge = f'<span class="badge badge-danger">Yüksək risk (Bal: {points}/100)</span>'
-                status_text = f"Risk balı qərar həddini ({limit}) keçir. İddia dərhal daxili auditə yönləndirilməlidir."
+                status_text = f"Risk balı qərar həddini ({limit}) keçir. İddia daxili auditə yönləndirilməlidir."
             elif score >= base_threshold * 0.5:
                 badge = f'<span class="badge badge-warning">Orta risk (Bal: {points}/100)</span>'
                 status_text = "Şübhəli göstəricilər var. Standart anderraytinq yoxlanışı tövsiyə edilir."
@@ -259,11 +365,11 @@ with tabs[0]:
             for feat, val in top.items():
                 if val > 0:
                     st.markdown(
-                        f"<span style='color: #f43f5e; font-weight: 700;'>▲ Artırır (+{val:.2f})</span>: {describe(feat)}",
+                        f"<span style='color: #fb7185; font-weight: 700;'>▲ Artırır (+{val:.2f})</span>: {describe(feat)}",
                         unsafe_allow_html=True)
                 else:
                     st.markdown(
-                        f"<span style='color: #34d399; font-weight: 700;'>▼ Azaldır ({val:.2f})</span>: {describe(feat)}",
+                        f"<span style='color: #6ee7b7; font-weight: 700;'>▼ Azaldır ({val:.2f})</span>: {describe(feat)}",
                         unsafe_allow_html=True)
 
             with st.expander("SHAP qərar qrafiki (Waterfall)"):
@@ -274,7 +380,7 @@ with tabs[0]:
         else:
             st.markdown("""
             <div class="custom-card" style="text-align: center; padding: 40px 20px;">
-                <div style="color: #64748b; font-size: 0.95rem;">Qiymətləndirmə üçün sol paneldə məlumatları daxil edib <b>Riski qiymətləndir</b> düyməsini sıxın.</div>
+                <div style="color: #64748b; font-size: 0.95rem;">Qiymətləndirmə üçün sol paneldə parametrləri seçib <b>Riski qiymətləndir</b> düyməsini sıxın.</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -286,28 +392,23 @@ with tabs[1]:
     st.write(
         "Sığorta iddialarını toplu şəkildə CSV faylı ilə yükləyin. Sistem bütün portfeli prioritet sırasına düzür.")
 
-    # Nümunə yaratmaq imkanı
     c_up, c_sample = st.columns([3, 1])
     uploaded_file = c_up.file_uploader("CSV faylı seçin", type=["csv"])
 
-    if c_sample.button("Sınaq üçün nümunə generasiya et"):
-        # Sessiyada saxta test datası yaradılır
+    if c_sample.button("Sınaq üçün nümunə portfel yarat"):
         sample_rows = []
         for _ in range(25):
             r = {c: meta["cat_defaults"].get(c, "") for c in meta["cat_cols"]}
             for c in meta["num_cols"]:
                 r[c] = meta["num_stats"][c]["default"]
             sample_rows.append(r)
-        # Bəzilərini şübhəli edək
         sample_rows[0]["Fault"] = "Policy Holder"
         sample_rows[0]["AddressChange_Claim"] = "2 to 3 years"
         sample_rows[1]["Fault"] = "Policy Holder"
         sample_rows[1]["Deductible"] = 700
 
-        sample_df = pd.DataFrame(sample_rows)
-        csv_data = sample_df.to_csv(index=False).encode('utf-8')
-        st.session_state["sample_csv"] = sample_df
-        st.success("25 sətirlik nümunə portfel hazırlandı. Aşağıdakı cədvələ baxın.")
+        st.session_state["sample_csv"] = pd.DataFrame(sample_rows)
+        st.success("25 sətirlik nümunə portfel hazırlandı.")
 
     target_df = None
     if uploaded_file is not None:
@@ -316,7 +417,6 @@ with tabs[1]:
         target_df = st.session_state["sample_csv"]
 
     if target_df is not None:
-        # Uyğun sütunları dolduraq
         for col in all_cols:
             if col not in target_df.columns:
                 if col in meta["cat_cols"]:
@@ -324,28 +424,25 @@ with tabs[1]:
                 else:
                     target_df[col] = meta["num_stats"][col]["default"]
 
-        # Skorinq
         scores = pipe.predict_proba(target_df[all_cols])[:, 1]
         target_df["Risk_Balı"] = (scores * 100).round().astype(int)
         target_df["Qərar"] = ["Yüksək risk" if s >= base_threshold else "Normal" for s in scores]
 
-        # Sıralama
         res_df = target_df.sort_values(by="Risk_Balı", ascending=False)
 
-        high_risk_count = (res_df["Risk_Balı"] >= (base_threshold * 100)).sum()
+        high_risk_count = int((res_df["Risk_Balı"] >= (base_threshold * 100)).sum())
         total_count = len(res_df)
 
         k1, k2, k3 = st.columns(3)
         k1.metric("Ümumi iddia sayı", total_count)
         k2.metric("Yüksək riskli iddia", high_risk_count)
-        k3.metric("Yoxlama yükü payı", f"{(high_risk_count / total_count * 100):.1f}%")
+        k3.metric("Audit yükü payı", f"{(high_risk_count / total_count * 100):.1f}%")
 
         st.markdown("#### Risk dərəcəsinə görə sıralanmış iddialar")
         cols_to_show = ["Risk_Balı", "Qərar", "Fault", "BasePolicy", "Age", "Deductible"]
         present_cols = [c for c in cols_to_show if c in res_df.columns]
         st.dataframe(res_df[present_cols], use_container_width=True)
 
-        # Nəticəni yükləmə düyməsi
         csv_out = res_df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="Qiymətləndirilmiş faylı yüklə (CSV)",
@@ -380,9 +477,6 @@ with tabs[2]:
     with col_roi:
         st.markdown("#### Test portfeli üzərində maliyyə təsiri (3,084 iddia)")
 
-        # Dinamik hesablama (təxmini test portfeli paylanmasına əsasən)
-        # Model 0.604 həddində: 541 yoxlanış, 109 tapılan saxta
-        # Hədd dəyişdikdə nisbət tənzimlənir
         factor = (1.0 - sim_threshold) / (1.0 - base_threshold)
         estimated_audits = int(min(3084, max(50, 541 * (factor ** 1.1))))
         estimated_frauds = int(min(185, max(15, 109 * (factor ** 0.55))))
@@ -439,5 +533,5 @@ with tabs[3]:
     st.markdown("""
     - **Qərar vermir, prioritetləşdirir:** Model sığorta ödənişini birbaşa rədd etmir, yoxlama komandasına növbəlilik təyin edir.
     - **Data xüsusiyyəti:** Model keçmiş nümunələr əsasında qərar verir. Yeni fırıldaqçılıq ssenariləri üçün model mütəmadi olaraq yenilənməlidir.
-    - **Gələcək optimallaşdırma:** `RepNumber` və s. kimi təsadüfi identifikatorların modeldən kənarlaşdırılması və anderraytinq xətalarının azaldılması.
+    - **Gələcək optimallaşdırma:** `RepNumber` və s. kimi təsadüfi amillərin modeldən kənarlaşdırılması və anderraytinq xətalarının azaldılması.
     """)
