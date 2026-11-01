@@ -21,7 +21,6 @@ st.markdown("""
         font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Dərin kiber arxa fon */
     .stApp {
         background-color: #060913 !important;
         background-image: 
@@ -31,7 +30,6 @@ st.markdown("""
         overflow-x: hidden;
     }
 
-    /* Arxa fonda üzən canlı neon dumanlar (Aurora effekti) */
     .stApp::before {
         content: "";
         position: fixed;
@@ -68,7 +66,6 @@ st.markdown("""
         100% { transform: translate(-40px, 90px) scale(0.95); }
     }
 
-    /* Buzlu şüşə (Glassmorphism) kartlar və hover animasiyası */
     .custom-card, div[data-testid="stMetric"], .stExpander, div[data-testid="stDataFrame"] {
         background: rgba(13, 20, 36, 0.65) !important;
         backdrop-filter: blur(16px) !important;
@@ -85,7 +82,6 @@ st.markdown("""
         box-shadow: 0 14px 34px -8px rgba(56, 189, 248, 0.15) !important;
     }
 
-    /* Qradiyent axan başlıq */
     .radar-header {
         display: flex;
         align-items: center;
@@ -109,7 +105,6 @@ st.markdown("""
         to { background-position: 200% center; }
     }
 
-    /* Nəbz vuran radar işığı */
     .radar-dot {
         width: 13px;
         height: 13px;
@@ -125,7 +120,6 @@ st.markdown("""
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
     }
 
-    /* Metrik rəqəmləri */
     div[data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         font-weight: 700 !important;
@@ -133,7 +127,6 @@ st.markdown("""
         color: #f8fafc !important;
     }
 
-    /* Modern tablar */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: transparent;
@@ -158,7 +151,6 @@ st.markdown("""
         box-shadow: 0 0 20px rgba(56, 189, 248, 0.15) !important;
     }
 
-    /* Status nişanları */
     .badge {
         display: inline-block;
         padding: 5px 12px;
@@ -185,51 +177,79 @@ st.markdown("""
         border: 1px solid rgba(52, 211, 153, 0.4); 
     }
 
-    /* Giriş sahələri və düymələr */
     .stButton>button {
         border-radius: 8px;
         font-weight: 600;
-        transition: all 0.25s ease;
     }
 </style>
 """, unsafe_allow_html=True)
 
 LABELS = {
     "Fault": ("Qəzada günahkar kimdir?", "Sığortalının özü, yoxsa digər tərəf."),
-    "BasePolicy": ("Sığorta növü",
-                   "Liability: yalnız başqasına dəyən ziyan. Collision: öz avtomobilinin zədəsi. All Perils: hər ikisi."),
-    "PolicyType": ("Polis tipi", "Avtomobil kateqoriyası və sığorta növünün birləşməsi."),
-    "VehicleCategory": ("Avtomobil kateqoriyası", "Sedan, idman və ya kommunal avtomobil."),
-    "VehiclePrice": ("Avtomobilin qiyməti ($)", "Qiymət aralığı."),
-    "AgeOfVehicle": ("Avtomobilin yaşı", "Neçə illik avtomobildir."),
-    "PastNumberOfClaims": ("Əvvəlki iddiaların sayı", "Sığortalı bundan əvvəl neçə iddia verib."),
-    "PoliceReportFiled": ("Polis hesabatı var?", "Hadisə polisə bildirilib?"),
-    "WitnessPresent": ("Şahid var?", "Hadisənin şahidi olub?"),
-    "AccidentArea": ("Hadisə yeri", "Şəhər və ya kənd."),
-    "AddressChange_Claim": ("Ünvan nə vaxt dəyişib?", "İddiadan nə qədər əvvəl sığortalı ünvanını dəyişib."),
-    "Age": ("Sürücünün yaşı", ""),
-    "Deductible": ("Franşiza ($)", "Zərərin hansı hissəsini sığortalı özü ödəyir."),
+    "BasePolicy": ("Sığorta növü", "İcbari: yalnız başqasına dəyən zərər. Kasko: öz avtomobilinin təmiri."),
+    "PolicyType": ("Polis tipi", "Avtomobil və sığorta növünün kombinasiyası."),
+    "VehicleCategory": ("Avtomobil kateqoriyası", "Sedan, idman və ya kommunal/yolsuzluq avtomobili."),
+    "VehiclePrice": ("Avtomobilin qiyməti ($)", "Avtomobilin bazar dəyəri."),
+    "AgeOfVehicle": ("Avtomobilin yaşı", "Avtomobilin buraxılış ilindən keçən müddət."),
+    "PastNumberOfClaims": ("Əvvəlki iddiaların sayı", "Sığortalının keçmişdəki müraciət sayı."),
+    "PoliceReportFiled": ("Polis hesabatı var?", "Qəza yerinə DYP çağırılıb protokol tərtib olunubmu?"),
+    "WitnessPresent": ("Şahid var?", "Hadisəni təsdiqləyən kənar şahid mövcuddur?"),
+    "AccidentArea": ("Hadisə yeri", "Şəhər daxili və ya kənd/rayon ərazisi."),
+    "AddressChange_Claim": ("Ünvan nə vaxt dəyişib?", "Qəzadan nə qədər əvvəl yaşayış ünvanı dəyişdirilib."),
+    "Age": ("Sürücünün yaşı", "Sükan arxasındakı şəxsin faktiki yaşı."),
+    "Deductible": ("Franşiza ($)", "Zərərin sığortalının öz cibindən ödədiyi hissəsi."),
 }
 
+# 100% Azərbaycan dilinə tərcümə lüğəti
 VALUE_AZ = {
+    # Fault
     "Policy Holder": "Sığortalının özü", "Third Party": "Üçüncü tərəf",
-    "Liability": "Liability (məsuliyyət)", "Collision": "Collision (toqquşma)",
-    "Yes": "Bəli", "No": "Xeyr", "Urban": "Şəhər", "Rural": "Kənd",
-    "no change": "Dəyişməyib", "under 6 months": "6 aydan az",
-    "1 year": "1 il", "2 to 3 years": "2-3 il", "4 to 8 years": "4-8 il",
-    "none": "Heç olmayıb", "more than 4": "4-dən çox",
+
+    # BasePolicy
+    "Liability": "İcbari (Məsuliyyət)", "Collision": "Kasko (Toqquşma)", "All Perils": "Tam kasko",
+
+    # PolicyType
+    "Sport - Liability": "İdman - İcbari", "Sport - Collision": "İdman - Kasko",
+    "Sport - All Perils": "İdman - Tam kasko",
+    "Sedan - Liability": "Sedan - İcbari", "Sedan - Collision": "Sedan - Kasko",
+    "Sedan - All Perils": "Sedan - Tam kasko",
+    "Utility - Liability": "Kommunal - İcbari", "Utility - Collision": "Kommunal - Kasko",
+    "Utility - All Perils": "Kommunal - Tam kasko",
+
+    # VehicleCategory
+    "Sedan": "Sedan", "Sport": "İdman (Sport)", "Utility": "Kommunal / Yolsuzluq",
+
+    # VehiclePrice
+    "less than 20000": "20 000 $-dan az", "20000 to 29000": "20 000 – 29 000 $",
+    "30000 to 39000": "30 000 – 39 000 $", "40000 to 59000": "40 000 – 59 000 $",
+    "60000 to 69000": "60 000 – 69 000 $", "more than 69000": "69 000 $-dan çox",
+
+    # AgeOfVehicle
+    "new": "Yeni", "2 years": "2 il", "3 years": "3 il", "4 years": "4 il",
+    "5 years": "5 il", "6 years": "6 il", "7 years": "7 il", "more than 7": "7 ildən çox",
+
+    # PastNumberOfClaims
+    "none": "Heç olmayıb", "1": "1 dəfə", "2 to 4": "2 – 4 dəfə", "more than 4": "4-dən çox",
+
+    # Binar və digər
+    "Yes": "Bəli", "No": "Xeyr", "Urban": "Şəhər", "Rural": "Kənd / Rayon",
+    "no change": "Dəyişməyib", "under 6 months": "6 aydan az əvvəl",
+    "1 year": "1 il əvvəl", "2 to 3 years": "2 – 3 il əvvəl", "4 to 8 years": "4 – 8 il əvvəl",
+    "Female": "Qadın", "Male": "Kişi", "Single": "Subay", "Married": "Evli", "Widow": "Dul", "Divorced": "Boşanmış"
 }
 
 PRESETS = {
     "normal": {
         "Fault": "Third Party", "BasePolicy": "Liability", "PolicyType": "Sedan - Liability",
-        "AddressChange_Claim": "no change", "Deductible": 400,
-        "PoliceReportFiled": "Yes", "WitnessPresent": "Yes", "Age": 45
+        "VehicleCategory": "Sedan", "VehiclePrice": "20000 to 29000", "AgeOfVehicle": "3 years",
+        "PastNumberOfClaims": "none", "AddressChange_Claim": "no change", "Deductible": 400,
+        "PoliceReportFiled": "Yes", "WitnessPresent": "Yes", "Age": 45, "AccidentArea": "Urban"
     },
     "suspicious": {
         "Fault": "Policy Holder", "BasePolicy": "Collision", "PolicyType": "Sedan - Collision",
-        "AddressChange_Claim": "2 to 3 years", "Deductible": 500,
-        "PoliceReportFiled": "No", "WitnessPresent": "No", "Age": 29
+        "VehicleCategory": "Sedan", "VehiclePrice": "40000 to 59000", "AgeOfVehicle": "7 years",
+        "PastNumberOfClaims": "2 to 4", "AddressChange_Claim": "2 to 3 years", "Deductible": 500,
+        "PoliceReportFiled": "No", "WitnessPresent": "No", "Age": 28, "AccidentArea": "Urban"
     },
 }
 
@@ -280,11 +300,12 @@ def widget(col, container):
 def describe(feature):
     for c in meta["cat_cols"]:
         if feature.startswith(c + "_"):
-            return f"{LABELS.get(c, (c,))[0]}: {az(feature[len(c) + 1:])}"
+            val_raw = feature[len(c) + 1:]
+            return f"{LABELS.get(c, (c,))[0]}: {az(val_raw)}"
     return f"{LABELS.get(feature, (feature,))[0]}"
 
 
-# Başlıq bloku
+# Başlıq
 st.markdown("""
 <div class="radar-header">
     <div class="radar-dot"></div>
@@ -336,7 +357,6 @@ with tabs[0]:
             points = round(score * 100)
             limit = round(base_threshold * 100)
 
-            # Status badge
             if score >= base_threshold:
                 badge = f'<span class="badge badge-danger">Yüksək risk (Bal: {points}/100)</span>'
                 status_text = f"Risk balı qərar həddini ({limit}) keçir. İddia daxili auditə yönləndirilməlidir."
@@ -355,7 +375,6 @@ with tabs[0]:
             </div>
             """, unsafe_allow_html=True)
 
-            # SHAP İzahı
             X_t = pd.DataFrame(prep.transform(row), columns=names)
             sv = explainer(X_t)
             contrib = pd.Series(sv.values[0], index=names)
@@ -390,25 +409,64 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("Sığorta portfelinin toplu auditi")
     st.write(
-        "Sığorta iddialarını toplu şəkildə CSV faylı ilə yükləyin. Sistem bütün portfeli prioritet sırasına düzür.")
+        "Sığorta iddialarını toplu şəkildə CSV faylı ilə yükləyin. Sistem bütün portfeli risk dərəcəsinə görə sıralayacaq.")
 
-    c_up, c_sample = st.columns([3, 1])
+    c_up, c_sample = st.columns([3, 1.2])
     uploaded_file = c_up.file_uploader("CSV faylı seçin", type=["csv"])
 
-    if c_sample.button("Sınaq üçün nümunə portfel yarat"):
+    if c_sample.button("Sınaq üçün nümunə portfel yarat", use_container_width=True):
+        # Müxtəlif, realistik 25 iddia profili generasiya edilir
         sample_rows = []
-        for _ in range(25):
+
+        # 1. Təhlükəsiz, normal iddialar (15 ədəd)
+        for i in range(15):
             r = {c: meta["cat_defaults"].get(c, "") for c in meta["cat_cols"]}
             for c in meta["num_cols"]:
                 r[c] = meta["num_stats"][c]["default"]
+            r["Fault"] = "Third Party"
+            r["BasePolicy"] = "Liability"
+            r["PolicyType"] = "Sedan - Liability"
+            r["AddressChange_Claim"] = "no change"
+            r["PastNumberOfClaims"] = "none" if i % 2 == 0 else "1"
+            r["PoliceReportFiled"] = "Yes"
+            r["WitnessPresent"] = "Yes"
+            r["Deductible"] = 400
+            r["Age"] = 35 + (i * 2)
             sample_rows.append(r)
-        sample_rows[0]["Fault"] = "Policy Holder"
-        sample_rows[0]["AddressChange_Claim"] = "2 to 3 years"
-        sample_rows[1]["Fault"] = "Policy Holder"
-        sample_rows[1]["Deductible"] = 700
+
+        # 2. Orta riskli iddialar (6 ədəd)
+        for i in range(6):
+            r = {c: meta["cat_defaults"].get(c, "") for c in meta["cat_cols"]}
+            for c in meta["num_cols"]:
+                r[c] = meta["num_stats"][c]["default"]
+            r["Fault"] = "Policy Holder" if i % 2 == 0 else "Third Party"
+            r["BasePolicy"] = "Collision"
+            r["PolicyType"] = "Sedan - Collision"
+            r["AddressChange_Claim"] = "1 year" if i % 2 == 0 else "no change"
+            r["PastNumberOfClaims"] = "1"
+            r["PoliceReportFiled"] = "No" if i % 2 == 0 else "Yes"
+            r["Deductible"] = 400
+            r["Age"] = 26 + (i * 3)
+            sample_rows.append(r)
+
+        # 3. Yüksək riskli, şübhəli iddialar (4 ədəd)
+        for i in range(4):
+            r = {c: meta["cat_defaults"].get(c, "") for c in meta["cat_cols"]}
+            for c in meta["num_cols"]:
+                r[c] = meta["num_stats"][c]["default"]
+            r["Fault"] = "Policy Holder"
+            r["BasePolicy"] = "Collision"
+            r["PolicyType"] = "Sedan - Collision" if i % 2 == 0 else "Sport - Collision"
+            r["AddressChange_Claim"] = "2 to 3 years"
+            r["PastNumberOfClaims"] = "2 to 4"
+            r["PoliceReportFiled"] = "No"
+            r["WitnessPresent"] = "No"
+            r["Deductible"] = 500 if i % 2 == 0 else 700
+            r["Age"] = 24 + i
+            sample_rows.append(r)
 
         st.session_state["sample_csv"] = pd.DataFrame(sample_rows)
-        st.success("25 sətirlik nümunə portfel hazırlandı.")
+        st.success("25 fərqli ssenaridən ibarət real nümunə portfel hazırlandı.")
 
     target_df = None
     if uploaded_file is not None:
@@ -417,6 +475,7 @@ with tabs[1]:
         target_df = st.session_state["sample_csv"]
 
     if target_df is not None:
+        # Model üçün sütunları dolduraq
         for col in all_cols:
             if col not in target_df.columns:
                 if col in meta["cat_cols"]:
@@ -428,7 +487,7 @@ with tabs[1]:
         target_df["Risk_Balı"] = (scores * 100).round().astype(int)
         target_df["Qərar"] = ["Yüksək risk" if s >= base_threshold else "Normal" for s in scores]
 
-        res_df = target_df.sort_values(by="Risk_Balı", ascending=False)
+        res_df = target_df.sort_values(by="Risk_Balı", ascending=False).reset_index(drop=True)
 
         high_risk_count = int((res_df["Risk_Balı"] >= (base_threshold * 100)).sum())
         total_count = len(res_df)
@@ -439,9 +498,18 @@ with tabs[1]:
         k3.metric("Audit yükü payı", f"{(high_risk_count / total_count * 100):.1f}%")
 
         st.markdown("#### Risk dərəcəsinə görə sıralanmış iddialar")
-        cols_to_show = ["Risk_Balı", "Qərar", "Fault", "BasePolicy", "Age", "Deductible"]
-        present_cols = [c for c in cols_to_show if c in res_df.columns]
-        st.dataframe(res_df[present_cols], use_container_width=True)
+
+        # Cədvəli 100% təmiz Azərbaycan dilində göstərmək üçün nüsxə çıxarırıq
+        display_df = res_df[["Risk_Balı", "Qərar", "Fault", "BasePolicy", "Age", "Deductible"]].copy()
+        display_df["Fault"] = display_df["Fault"].map(az)
+        display_df["BasePolicy"] = display_df["BasePolicy"].map(az)
+
+        display_df.columns = [
+            "Risk balı (0-100)", "Sistem qərarı", "Qəzada günahkar",
+            "Sığorta növü", "Sürücü yaşı", "Franşiza ($)"
+        ]
+
+        st.dataframe(display_df, use_container_width=True)
 
         csv_out = res_df.to_csv(index=False).encode('utf-8')
         st.download_button(
