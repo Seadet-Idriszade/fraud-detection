@@ -1,0 +1,291 @@
+{
+  "threshold": 0.6044822931289673,
+  "cat_cols": [
+    "Month",
+    "DayOfWeek",
+    "Make",
+    "AccidentArea",
+    "DayOfWeekClaimed",
+    "MonthClaimed",
+    "Sex",
+    "MaritalStatus",
+    "Fault",
+    "PolicyType",
+    "VehicleCategory",
+    "VehiclePrice",
+    "Days_Policy_Accident",
+    "Days_Policy_Claim",
+    "PastNumberOfClaims",
+    "AgeOfVehicle",
+    "AgeOfPolicyHolder",
+    "PoliceReportFiled",
+    "WitnessPresent",
+    "AgentType",
+    "NumberOfSuppliments",
+    "AddressChange_Claim",
+    "NumberOfCars",
+    "BasePolicy"
+  ],
+  "num_cols": [
+    "WeekOfMonth",
+    "WeekOfMonthClaimed",
+    "Age",
+    "RepNumber",
+    "Deductible",
+    "DriverRating",
+    "Year"
+  ],
+  "options": {
+    "Month": [
+      "Apr",
+      "Aug",
+      "Dec",
+      "Feb",
+      "Jan",
+      "Jul",
+      "Jun",
+      "Mar",
+      "May",
+      "Nov",
+      "Oct",
+      "Sep"
+    ],
+    "DayOfWeek": [
+      "Friday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Thursday",
+      "Tuesday",
+      "Wednesday"
+    ],
+    "Make": [
+      "Accura",
+      "BMW",
+      "Chevrolet",
+      "Dodge",
+      "Ferrari",
+      "Ford",
+      "Honda",
+      "Jaguar",
+      "Lexus",
+      "Mazda",
+      "Mecedes",
+      "Mercury",
+      "Nisson",
+      "Pontiac",
+      "Porche",
+      "Saab",
+      "Saturn",
+      "Toyota",
+      "VW"
+    ],
+    "AccidentArea": [
+      "Rural",
+      "Urban"
+    ],
+    "DayOfWeekClaimed": [
+      "0",
+      "Friday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Thursday",
+      "Tuesday",
+      "Wednesday"
+    ],
+    "MonthClaimed": [
+      "0",
+      "Apr",
+      "Aug",
+      "Dec",
+      "Feb",
+      "Jan",
+      "Jul",
+      "Jun",
+      "Mar",
+      "May",
+      "Nov",
+      "Oct",
+      "Sep"
+    ],
+    "Sex": [
+      "Female",
+      "Male"
+    ],
+    "MaritalStatus": [
+      "Divorced",
+      "Married",
+      "Single",
+      "Widow"
+    ],
+    "Fault": [
+      "Policy Holder",
+      "Third Party"
+    ],
+    "PolicyType": [
+      "Sedan - All Perils",
+      "Sedan - Collision",
+      "Sedan - Liability",
+      "Sport - All Perils",
+      "Sport - Collision",
+      "Sport - Liability",
+      "Utility - All Perils",
+      "Utility - Collision",
+      "Utility - Liability"
+    ],
+    "VehicleCategory": [
+      "Sedan",
+      "Sport",
+      "Utility"
+    ],
+    "VehiclePrice": [
+      "20000 to 29000",
+      "30000 to 39000",
+      "40000 to 59000",
+      "60000 to 69000",
+      "less than 20000",
+      "more than 69000"
+    ],
+    "Days_Policy_Accident": [
+      "1 to 7",
+      "15 to 30",
+      "8 to 15",
+      "more than 30",
+      "none"
+    ],
+    "Days_Policy_Claim": [
+      "15 to 30",
+      "8 to 15",
+      "more than 30",
+      "none"
+    ],
+    "PastNumberOfClaims": [
+      "1",
+      "2 to 4",
+      "more than 4",
+      "none"
+    ],
+    "AgeOfVehicle": [
+      "2 years",
+      "3 years",
+      "4 years",
+      "5 years",
+      "6 years",
+      "7 years",
+      "more than 7",
+      "new"
+    ],
+    "AgeOfPolicyHolder": [
+      "16 to 17",
+      "18 to 20",
+      "21 to 25",
+      "26 to 30",
+      "31 to 35",
+      "36 to 40",
+      "41 to 50",
+      "51 to 65",
+      "over 65"
+    ],
+    "PoliceReportFiled": [
+      "No",
+      "Yes"
+    ],
+    "WitnessPresent": [
+      "No",
+      "Yes"
+    ],
+    "AgentType": [
+      "External",
+      "Internal"
+    ],
+    "NumberOfSuppliments": [
+      "1 to 2",
+      "3 to 5",
+      "more than 5",
+      "none"
+    ],
+    "AddressChange_Claim": [
+      "1 year",
+      "2 to 3 years",
+      "4 to 8 years",
+      "no change",
+      "under 6 months"
+    ],
+    "NumberOfCars": [
+      "1 vehicle",
+      "2 vehicles",
+      "3 to 4",
+      "5 to 8",
+      "more than 8"
+    ],
+    "BasePolicy": [
+      "All Perils",
+      "Collision",
+      "Liability"
+    ]
+  },
+  "cat_defaults": {
+    "Month": "Jan",
+    "DayOfWeek": "Monday",
+    "Make": "Pontiac",
+    "AccidentArea": "Urban",
+    "DayOfWeekClaimed": "Monday",
+    "MonthClaimed": "Jan",
+    "Sex": "Male",
+    "MaritalStatus": "Married",
+    "Fault": "Policy Holder",
+    "PolicyType": "Sedan - Collision",
+    "VehicleCategory": "Sedan",
+    "VehiclePrice": "20000 to 29000",
+    "Days_Policy_Accident": "more than 30",
+    "Days_Policy_Claim": "more than 30",
+    "PastNumberOfClaims": "2 to 4",
+    "AgeOfVehicle": "7 years",
+    "AgeOfPolicyHolder": "31 to 35",
+    "PoliceReportFiled": "No",
+    "WitnessPresent": "No",
+    "AgentType": "External",
+    "NumberOfSuppliments": "none",
+    "AddressChange_Claim": "no change",
+    "NumberOfCars": "1 vehicle",
+    "BasePolicy": "Collision"
+  },
+  "num_stats": {
+    "WeekOfMonth": {
+      "min": 1,
+      "max": 5,
+      "default": 3
+    },
+    "WeekOfMonthClaimed": {
+      "min": 1,
+      "max": 5,
+      "default": 3
+    },
+    "Age": {
+      "min": 0,
+      "max": 80,
+      "default": 38
+    },
+    "RepNumber": {
+      "min": 1,
+      "max": 16,
+      "default": 8
+    },
+    "Deductible": {
+      "min": 300,
+      "max": 700,
+      "default": 400
+    },
+    "DriverRating": {
+      "min": 1,
+      "max": 4,
+      "default": 2
+    },
+    "Year": {
+      "min": 1994,
+      "max": 1996,
+      "default": 1995
+    }
+  }
+}

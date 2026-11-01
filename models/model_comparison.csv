@@ -1,0 +1,6 @@
+Model,ROC-AUC,PR-AUC
+XGBoost + scale_pos_weight,0.846,0.257
+RandomForest + class_weight,0.837,0.244
+RandomForest + SMOTE,0.828,0.219
+Logistic (baseline),0.813,0.179
+Logistic + class_weight,0.806,0.156
