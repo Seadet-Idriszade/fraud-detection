@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sığorta Fraud Radar: Necə İşləyir</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root {
+  --bg: #070b14;
+  --card: rgba(255,255,255,.045);
+  --bd: rgba(255,255,255,.1);
+  --tx: #eef2fb;
+  --mu: #8f9bb5;
+  --ok: #3ddcc8;
+  --vi: #8b7cff;
+  --bad: #ff5c7a;
+  --am: #ffb547;
+  --on: #06101a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--tx);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  font: 16px/1.55 Manrope, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(2.1rem, 4.5vw, 3.8rem); line-height: 1.08; font-weight: 800; letter-spacing: -.03em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.15; font-weight: 800; letter-spacing: -.025em; }
+.mono, code { font-family: "JetBrains Mono", monospace; }
+code { background: var(--card); border: 1px solid var(--bd); padding: 1px 7px; border-radius: 6px; font-size: .85em; }
+
+#net { position: fixed; inset: 0; z-index: 0; }
+.aur i { position: fixed; border-radius: 50%; filter: blur(110px); opacity: .28; z-index: 0; animation: dr 22s ease-in-out infinite alternate; }
+.aur i:nth-child(1) { width: 520px; height: 520px; background: var(--ok); left: -160px; top: -160px; }
+.aur i:nth-child(2) { width: 480px; height: 480px; background: var(--vi); right: -140px; bottom: -140px; animation-duration: 28s; }
+.aur i:nth-child(3) { width: 320px; height: 320px; background: var(--bad); right: 28%; top: -120px; opacity: .16; animation-duration: 34s; }
+@keyframes dr { to { transform: translate3d(80px, 60px, 0) scale(1.15); } }
+
+.glow { position: fixed; left: -210px; top: -210px; width: 420px; height: 420px; border-radius: 50%; pointer-events: none; z-index: 1; background: radial-gradient(circle, rgba(61,220,200,.14), transparent 65%); transition: transform .12s linear; }
+
+/* Top nav */
+.top { position: fixed; top: 0; left: 0; right: 0; z-index: 6; display: flex; align-items: center; gap: 14px; padding: 16px 24px; background: rgba(7, 11, 20, 0.7); backdrop-filter: blur(14px); border-bottom: 1px solid var(--bd); }
+.brand { font-weight: 800; white-space: nowrap; font-size: 1.1rem; }
+.ttl, .cnt { color: var(--mu); font-size: .85rem; white-space: nowrap; }
+.cnt { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+.prog { flex: 1; display: flex; gap: 6px; min-width: 50px; }
+.seg { flex: 1; height: 5px; padding: 0; border: 0; border-radius: 9px; cursor: pointer; background: var(--bd); transition: background .4s, box-shadow .4s; }
+.seg.done { background: linear-gradient(90deg, var(--ok), var(--vi)); }
+.seg.cur { box-shadow: 0 0 12px var(--ok); }
+
+/* Bottom nav */
+.nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; gap: 12px; }
+.nav button { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--bd); background: var(--card); backdrop-filter: blur(12px); color: var(--tx); font-size: 1.1rem; cursor: pointer; transition: .25s; }
+.nav button:hover:not(:disabled) { border-color: var(--ok); box-shadow: 0 0 20px rgba(61,220,200,.35); transform: translateY(-2px); }
+.nav button:disabled { opacity: .25; cursor: not-allowed; }
+
+/* Scenes */
+.scene { position: fixed; inset: 0; z-index: 2; display: flex; justify-content: center; opacity: 0; visibility: hidden; transform: translateY(18px) scale(.985); filter: blur(8px); transition: opacity .5s, transform .6s cubic-bezier(.2,.7,.2,1), filter .5s, visibility .5s; }
+.scene.on { opacity: 1; visibility: visible; transform: none; filter: none; }
+.in { width: 100%; max-width: 1100px; height: 100%; overflow-y: auto; padding: 85px 24px 95px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.in::-webkit-scrollbar { width: 5px; }
+.in::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 4px; }
+.scene.on .in > * { animation: up .7s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--k,0)*75ms); }
+@keyframes up { from { opacity: 0; transform: translateY(20px); } }
+
+.lead { color: var(--mu); max-width: 66ch; font-size: 1.05rem; line-height: 1.58; }
+.mu { color: var(--mu); } .ok { color: var(--ok); } .bad { color: var(--bad); } .am { color: var(--am); } .vi { color: var(--vi); }
+.tag { display: inline-block; width: fit-content; border: 1px solid var(--bd); background: var(--card); border-radius: 99px; padding: 4px 14px; font-size: .8rem; color: var(--mu); font-weight: 600; }
+.grad { background: linear-gradient(100deg, var(--ok), var(--vi), var(--bad), var(--ok)); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sh 7s linear infinite; }
+@keyframes sh { to { background-position: 250% 0; } }
+
+.cols { display: grid; grid-template-columns: 1.1fr .9fr; gap: 36px; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+.card { position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px); transition: border-color .3s, transform .3s; }
+.card::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s; pointer-events: none; background: radial-gradient(260px circle at var(--x,50%) var(--y,50%), rgba(61,220,200,.15), transparent 70%); }
+.card:hover { border-color: rgba(61,220,200,.45); }
+.card:hover::before { opacity: 1; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stat b { display: block; font-size: 2rem; font-weight: 800; letter-spacing: -.03em; font-family: "JetBrains Mono", monospace; }
+.stat span { color: var(--mu); font-size: .82rem; }
+
+/* 100 dot matrix */
+.dots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; width: min(100%, 340px); justify-self: center; }
+.dots i { aspect-ratio: 1; border-radius: 50%; background: var(--bd); transform: scale(.3); transition: transform .5s, background .6s, box-shadow .6s; }
+.dots.go i { background: var(--ok); transform: scale(1); }
+.dots.go i.f.hit { background: var(--bad); transform: scale(1.35); box-shadow: 0 0 16px var(--bad); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--bd); background: var(--card); border-radius: 99px; padding: 5px 13px; font-size: .84rem; }
+.chip small { color: var(--mu); }
+.split { display: flex; height: 38px; border-radius: 10px; overflow: hidden; font-size: .82rem; font-weight: 800; color: var(--on); }
+.split span { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Trees interactive */
+.trees { display: flex; gap: 7px; min-height: 60px; align-items: flex-end; flex-wrap: wrap; }
+.tree { width: 22px; border-radius: 6px 6px 2px 2px; background: linear-gradient(var(--ok), var(--vi)); animation: gr .45s both; }
+@keyframes gr { from { height: 0 !important; opacity: 0; } }
+.meter { height: 12px; border-radius: 9px; background: var(--bd); overflow: hidden; }
+.meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--bad), var(--am)); transition: width .6s; }
+.btn { border: 1px solid var(--ok); background: transparent; color: var(--ok); border-radius: 10px; padding: 8px 16px; font-weight: 600; cursor: pointer; transition: .25s; }
+.btn:hover { background: var(--ok); color: var(--on); box-shadow: 0 0 20px rgba(61,220,200,.4); }
+
+/* Model chart */
+.row { display: grid; grid-template-columns: minmax(140px, 250px) 1fr 56px; gap: 12px; align-items: center; margin: 10px 0; font-size: .92rem; }
+.track { position: relative; height: 24px; background: var(--bd); border-radius: 8px; }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: 8px; background: var(--mu); width: 0; transition: width 1.1s cubic-bezier(.2,.7,.2,1); }
+.track.win i { background: linear-gradient(90deg, var(--ok), var(--vi)); box-shadow: 0 0 18px rgba(61,220,200,.45); }
+.track b { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--am); }
+
+/* Confusion matrix */
+.mx { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; }
+.mx .h { color: var(--mu); font-size: .78rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.cell { border: 1px solid var(--bd); background: var(--card); border-radius: 14px; padding: 14px 6px; cursor: pointer; text-align: center; transition: .25s; }
+.cell b { display: block; font-size: 1.8rem; font-weight: 800; font-family: "JetBrains Mono", monospace; }
+.cell span { font-size: .76rem; color: var(--mu); }
+.cell:hover { transform: translateY(-3px); }
+.cell.sel { border-color: var(--am); box-shadow: 0 0 22px rgba(255,181,71,.3); }
+
+/* Rings */
+.rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+.ring { position: relative; }
+.ring svg { width: 100%; max-width: 110px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+.ring .rb { stroke: var(--bd); }
+.ring .rf { transition: stroke-dashoffset 1.5s cubic-bezier(.2,.7,.2,1); }
+.ring em { position: absolute; left: 0; right: 0; top: 32px; font-style: normal; font-weight: 800; font-size: 1.25rem; font-family: "JetBrains Mono", monospace; }
+.ring span { display: block; font-size: .76rem; color: var(--mu); margin-top: 4px; }
+
+/* Waterfall */
+.wf { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: 12px 14px; align-items: center; font-size: .9rem; }
+.wf .b { height: 26px; border-radius: 7px; display: flex; align-items: center; padding-left: 9px; font-weight: 800; font-size: .8rem; color: var(--on); width: 0; transition: width 1s cubic-bezier(.2,.7,.2,1); font-family: "JetBrains Mono", monospace; }
+
+/* System Flow */
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; position: relative; }
+.flow::before { content: ""; position: absolute; left: 6%; right: 6%; top: -10px; height: 2px; background: repeating-linear-gradient(90deg, var(--ok) 0 10px, transparent 10px 20px); background-size: 20px 2px; animation: mv 1s linear infinite; opacity: .7; }
+@keyframes mv { to { background-position: 20px 0; } }
+
+/* Responsive */
+@media (max-width: 840px) {
+  .cols, .g2 { grid-template-columns: 1fr; }
+  .stats, .flow { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr; }
+  .ttl { display: none; }
+  .row { grid-template-columns: 1fr 56px; }
+  .row .nm { grid-column: 1/-1; }
+  .wf { grid-template-columns: 1fr; }
+  .glow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="net"></canvas>
+<div class="aur"><i></i><i></i><i></i></div>
+<div class="glow" id="glow"></div>
+
+<div class="top">
+  <span class="brand">Fraud Radar</span>
+  <span class="ttl" id="ttl"></span>
+  <div class="prog" id="prog"></div>
+  <span class="cnt" id="cnt"></span>
+</div>
+
+<!-- SƏHNƏ 1: Problem -->
+<section class="scene" data-title="Problem"><div class="in">
+  <div class="cols">
+    <div class="col">
+      <span class="tag">Sığorta analitikası & Maşın öyrənməsi</span>
+      <h1>Saxta iddianı yoxlayandan əvvəl <span class="grad">tapan sistem</span></h1>
+      <p class="lead">Sığorta şirkətinə gündə çoxlu iddia daxil olur və hamısını əllə yoxlamaq qeyri-mümkündür. Sistem hər iddiaya risk balı verir və yoxlama komandasına hansına əvvəl baxmaq lazım olduğunu göstərir.</p>
+    </div>
+    <div class="dots" id="dots" aria-label="100 iddia, 6-sı saxta"></div>
+  </div>
+  <div class="stats">
+    <div class="card stat"><b data-n="15420">0</b><span>keçmiş iddia ilə öyrədildi</span></div>
+    <div class="card stat"><b><span data-n="6" style="color:inherit;font-size:inherit">0</span><span class="bad" style="font-size:inherit">%</span></b><span>həqiqi saxtakarlıq (balanssız data)</span></div>
+    <div class="card stat"><b><span data-n="59" style="color:inherit;font-size:inherit">0</span><span class="ok" style="font-size:inherit">%</span></b><span>saxta iddia tapıldı (recall)</span></div>
+    <div class="card stat"><b><span data-n="3.4" data-d="1" style="color:inherit;font-size:inherit">0</span><span class="am" style="font-size:inherit">×</span></b><span>təsadüfi seçimdən effektiv</span></div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 2: Dəqiqlik Tələsi -->
+<section class="scene" data-title="Dəqiqlik tələsi"><div class="in">
+  <h2>Niyə 94% dəqiqlik (accuracy) əslində sıfır nəticədir?</h2>
+  <p class="lead">Bütün iddialara kor-təbii "Normal" deyən ən sadə model 94% dəqiq çıxardı, çünki iddiaların 94%-i həqiqətən qanunidir. Amma şirkət 1 dənə də saxtakarlıq tuta bilməzdi.</p>
+  <div class="g2">
+    <div class="card" style="border-left: 4px solid var(--bad);">
+      <h3 class="bad" style="font-size:1.15rem;margin-bottom:8px">Tənbəl model (Accuracy tələsi)</h3>
+      <p class="mu" style="margin-bottom:12px">Heç bir hesablama aparmadan hər iddiaya "Normal" deyir.</p>
+      <div style="font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">Accuracy: 94.0%</div>
+      <div style="font-size:.9rem;color:var(--bad);font-weight:700;margin-top:6px">Tapılan saxtakarlıq: 0% (Bütün pullar itirilir)</div>
+    </div>
+    <div class="card" style="border-left: 4px solid var(--ok);">
+      <h3 class="ok" style="font-size:1.15rem;margin-bottom:8px">Bizim model (PR-AUC hədəfi)</h3>
+      <p class="mu" style="margin-bottom:12px">Dəqiqliyə yox, azlıqda qalan saxtakarlıqları tutma qabiliyyətinə köklənir.</p>
+      <div style="font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">PR-AUC: 0.257</div>
+      <div style="font-size:.9rem;color:var(--ok);font-weight:700;margin-top:6px">Təsadüfi seçimdən (0.060) 4 dəfədən çox güclü</div>
+    </div>
+  </div>
+  <div class="card"><p class="mu"><b>Nəticə:</b> Balanssız datada (6% fraud) adi Accuracy metriki aldadıcıdır. Əsas diqqət <b>Precision-Recall AUC</b> göstəricisinə verilməlidir.</p></div>
+</div></section>
+
+<!-- SƏHNƏ 3: Data və Bölgü -->
+<section class="scene" data-title="Data"><div class="in">
+  <h2>15 420 iddia və Stratified bölgü</h2>
+  <p class="lead">Hər iddia bir hadisədir. Məlumatı 80% öyrənmə və 20% test hissələrinə böldük. Hər iki tərəfdə saxtakarlıq faizi eyni saxlanıldı.</p>
+  <div class="chips">
+    <span class="chip">Fault <small>günahkar kimdir</small></span>
+    <span class="chip">BasePolicy <small>sığorta növü</small></span>
+    <span class="chip">AddressChange_Claim <small>ünvan nə vaxt dəyişib</small></span>
+    <span class="chip">Deductible <small>franşiza</small></span>
+    <span class="chip">Age <small>sürücü yaşı</small></span>
+    <span class="chip">VehiclePrice <small>avtomobil qiyməti</small></span>
+    <span class="chip" style="border-color:var(--bad)">FraudFound_P <small>cavab: 0 və ya 1</small></span>
+  </div>
+  <div class="card">
+    <p style="margin-bottom:10px;font-weight:800">Stratified bölgü qorunması</p>
+    <div class="split">
+      <span style="width:80%;background:var(--ok)">Öyrənmə: 80% (12 336 iddia)</span>
+      <span style="width:20%;background:var(--am)">Test: 20% (3 084 iddia)</span>
+    </div>
+    <p class="mu" style="margin-top:10px">Model 3 084 test iddiasını təlim vaxtı heç vaxt görmür. Qiymətləndirmə yalnız bu görmədiyi hissədə aparılır.</p>
+  </div>
+  <div class="g2">
+    <div class="card"><b>PolicyNumber çıxarıldı</b><p class="mu">Sadəcə verilənlər bazasının ID nömrəsidir, hadisə haqqında məlumat daşımır və modeli çaşdırar.</p></div>
+    <div class="card"><b>RepNumber nəzarəti</b><p class="mu">Agent nömrəsi kimi amillər gələcəkdə data sızması (leakage) yaratmasın deyə diqqətlə izlənilir.</p></div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 4: Ön Emal Sxemi -->
+<section class="scene" data-title="Ön emal"><div class="in">
+  <h2>Xam məlumatdan modelə: Pipeline axışı</h2>
+  <p class="lead">Sistemə daxil olan mətni model birbaşa oxuya bilməz. Məlumatlar avtomatik riyazi şəklə salınır.</p>
+  <div class="card" style="padding:16px">
+    <svg viewBox="0 0 850 160" style="width:100%;height:auto;display:block">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--ok)"/>
+        </marker>
+      </defs>
+      <rect x="10" y="30" width="180" height="95" rx="10" fill="var(--card)" stroke="var(--bd)"/>
+      <text x="100" y="65" fill="var(--tx)" font-weight="700" text-anchor="middle" font-size="14">Xam iddia</text>
+      <text x="100" y="90" fill="var(--mu)" text-anchor="middle" font-size="11">Mətn və ədədlər</text>
+
+      <path d="M 190 77 L 235 77" stroke="var(--ok)" stroke-width="2" marker-end="url(#arr)"/>
+
+      <rect x="240" y="30" width="220" height="95" rx="10" fill="var(--card)" stroke="var(--ok)"/>
+      <text x="350" y="65" fill="var(--ok)" font-weight="700" text-anchor="middle" font-size="14">One-Hot Encoding</text>
+      <text x="350" y="90" fill="var(--mu)" text-anchor="middle" font-size="11">Mətnlər 0 və 1 olur</text>
+
+      <path d="M 460 77 L 505 77" stroke="var(--ok)" stroke-width="2" marker-end="url(#arr)"/>
+
+      <rect x="510" y="30" width="180" height="95" rx="10" fill="var(--card)" stroke="var(--vi)"/>
+      <text x="600" y="65" fill="var(--vi)" font-weight="700" text-anchor="middle" font-size="14">XGBoost modeli</text>
+      <text x="600" y="90" fill="var(--mu)" text-anchor="middle" font-size="11">400 qərar ağacı</text>
+
+      <path d="M 690 77 L 735 77" stroke="var(--ok)" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="780" cy="77" r="30" fill="rgba(61,220,200,.15)" stroke="var(--ok)" stroke-width="2"/>
+      <text x="780" y="74" fill="var(--ok)" font-weight="800" text-anchor="middle" font-size="11">Risk balı</text>
+      <text x="780" y="90" fill="var(--tx)" font-weight="700" text-anchor="middle" font-size="10" class="mono">0-100</text>
+    </svg>
+  </div>
+  <div class="g2">
+    <div class="card"><b>Pipeline zənciri</b><p class="mu">Ön emal və model bir yerdə saxlanılır. Canlı veb tətbiq eyni addımları xətasız təkrarlayır.</p></div>
+    <div class="card"><b>Təhlükəsizlik</b><p class="mu">Test datasındakı heç bir məlumat təlim vaxtı istifadə edilmir (Data leakage-in qarşısı alınır).</p></div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 5: Balanssızlıq Tənzimi -->
+<section class="scene" data-title="Balanssızlıq"><div class="in">
+  <h2>Niyə SMOTE yox, cərimə funksiyası (scale_pos_weight)?</h2>
+  <p class="lead">Azlıqda olan saxtakarlıqları öyrətmək üçün iki fərqli metod sınaqdan keçirildi.</p>
+  <div class="g2">
+    <div class="card" style="border-left: 4px solid var(--bad);">
+      <h3 style="margin-bottom:8px">SMOTE niyə zəif çıxdı? (0.219)</h3>
+      <p class="mu">SMOTE az olan sinifdən süni nümunələr düzəldir. Sığorta datasında məlumatlar mürəkkəb olduğu üçün SMOTE real olmayan absurd ssenarilər yaratdı və modeli çaşdırdı.</p>
+    </div>
+    <div class="card" style="border-left: 4px solid var(--ok);">
+      <h3 class="ok" style="margin-bottom:8px">Qalib: scale_pos_weight (0.257)</h3>
+      <p class="mu">Data dəyişdirilmir. Sadəcə model saxta iddianı qaçıranda ona normal iddianın səhvindən <b>təxminən 15 dəfə çox cərimə</b> qoyulur. Model saxtakarlığı diqqətdə saxlamağa məcbur olur.</p>
+    </div>
+  </div>
+  <div class="card">
+    <p class="mu"><b>Nisbət:</b> 1 saxta iddia səhvi = 15 normal iddia səhvinə bərabər cərimələnir.</p>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 6: XGBoost Modeli -->
+<section class="scene" data-title="Model"><div class="in">
+  <h2>XGBoost: səhvləri ardıcıl düzəldən ağaclar</h2>
+  <p class="lead">Qərar ağacları ardıcıl əlavə olunur və hər yeni ağac əvvəlkilərin səhvini düzəldir.</p>
+  <div class="cols">
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div class="trees" id="trees"></div>
+      <div>
+        <p class="mu" style="margin-bottom:6px;font-size:.88rem">Qalan səhv (sxematik nümunə): <span id="err" class="mono">100</span>%</p>
+        <div class="meter"><i id="errbar" style="width:100%"></i></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="addTree">Ağac əlavə et</button>
+        <button class="btn" id="resetTree" style="border-color:var(--bd);color:var(--mu)">Sıfırla</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><b>Parametrlər</b><p class="mu">400 ağac, dərinlik 4, öyrənmə sürəti (learning rate) 0.05.</p></div>
+      <div class="card"><b>Qərar həddi: 0.604</b><p class="mu">Test datasına baxmadan, təlim datasında 5-qatlı cross-validation ilə seçildi ki, nəticə şişirdilməsin.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 7: Modellərin Müqayisəsi -->
+<section class="scene" data-title="Müqayisə"><div class="in">
+  <h2>5 modeli eyni testdə yarışdırdıq</h2>
+  <p class="lead">Narıncı xətt təsadüfi modelin səviyyəsidir (0.060). XGBoost ən yüksək PR-AUC nəticəsini verdi.</p>
+  <div class="card" id="chart"></div>
+  <div class="g2">
+    <div class="card"><b>Ağac modelləri</b><p class="mu">XGBoost və RandomForest qeyri-xətti əlaqələri daha yaxşı tutur.</p></div>
+    <div class="card"><b>Xətti modellər</b><p class="mu">Logistic Regression mürəkkəb kombinasiyaları görə bilmədiyi üçün geridə qaldı.</p></div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 8: Qərar Həddi (Threshold) -->
+<section class="scene" data-title="Qərar həddi"><div class="in">
+  <h2>Niyə standart 0.50 yox, məhz 0.604 həddi?</h2>
+  <p class="lead">Standart 0.50 həddi çoxlu yanlış həyəcan (False Positive) yaradır və yoxlama komandasını boş yerə yükləyir.</p>
+  <div class="g2">
+    <div class="card">
+      <h3 style="margin-bottom:8px">Hədd 0.50 olanda</h3>
+      <p class="mu">Daha çox saxtakarlıq tutulur, amma yoxlanmalı iddiaların sayı 30-35%-ə qalxır. Komandanın bu qədər işi əllə yoxlamağa vaxtı çatmır.</p>
+    </div>
+    <div class="card" style="border-color:var(--ok)">
+      <h3 class="ok" style="margin-bottom:8px">Seçilmiş 0.604 həddi</h3>
+      <p class="mu">Mükəmməl balans: İddiaların cəmi <b>17.5%-ni</b> yoxlamaqla mövcud saxtakarlıqların <b>59%-ni</b> tutmaq mümkün olur.</p>
+    </div>
+  </div>
+  <div class="card"><p class="mu"><b>Qeyd:</b> Bu hədd test datasından yox, sırf təlim zamanı çarpaz yoxlama (Cross-Validation) ilə təyin edilmişdir.</p></div>
+</div></section>
+
+<!-- SƏHNƏ 9: Test Nəticəsi və Matris -->
+<section class="scene" data-title="Nəticə"><div class="in">
+  <h2>Görmədiyi 3 084 iddia üzərində nəticə</h2>
+  <div class="cols">
+    <div class="mx" id="mx">
+      <span></span><span class="h">Model dedi: normal</span><span class="h">Model dedi: şübhəli</span>
+      <span class="h">Həqiqətən normal</span>
+      <button class="cell" data-k="0"><b>2467</b><span>düzgün buraxıldı</span></button>
+      <button class="cell" data-k="1"><b class="am">432</b><span>yanlış həyəcan</span></button>
+      <span class="h">Həqiqətən saxta</span>
+      <button class="cell" data-k="2"><b class="bad">76</b><span>qaçırıldı</span></button>
+      <button class="cell" data-k="3"><b class="ok">109</b><span>tapıldı</span></button>
+    </div>
+    <div class="col">
+      <div class="card"><p id="mxText" style="min-height:3.2em"></p></div>
+      <div class="rings">
+        <div class="ring">
+          <svg viewBox="0 0 100 100"><circle class="rb" cx="50" cy="50" r="42"/><circle class="rf" cx="50" cy="50" r="42" stroke="var(--ok)" data-p=".59" stroke-dasharray="264" stroke-dashoffset="264"/></svg>
+          <em data-n="59">0</em>
+          <span>Recall: saxtaların neçəsi tapıldı</span>
+        </div>
+        <div class="ring">
+          <svg viewBox="0 0 100 100"><circle class="rb" cx="50" cy="50" r="42"/><circle class="rf" cx="50" cy="50" r="42" stroke="var(--am)" data-p=".20" stroke-dasharray="264" stroke-dashoffset="264"/></svg>
+          <em data-n="20">0</em>
+          <span>Precision: şübhəlilərin neçəsi doğrudur</span>
+        </div>
+        <div class="ring">
+          <svg viewBox="0 0 100 100"><circle class="rb" cx="50" cy="50" r="42"/><circle class="rf" cx="50" cy="50" r="42" stroke="var(--vi)" data-p=".175" stroke-dasharray="264" stroke-dashoffset="264"/></svg>
+          <em data-n="17.5" data-d="1">0</em>
+          <span>Yoxlanan iddia payı</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mu">Yoxlama komandası iddiaların 17,5%-nə baxsa, saxtaların 59%-ni tutur: təsadüfi seçimdən təxminən 3,4 dəfə effektiv.</p>
+</div></section>
+
+<!-- SƏHNƏ 10: Maliyyə Təsiri -->
+<section class="scene" data-title="Maliyyə"><div class="in">
+  <h2>Şirkətə təsiri: Zərər və qənaət balansı</h2>
+  <p class="lead">Hər səhvin bir qiyməti var. Qaçırılan saxta iddia şirkətə baha başa gəlir, yanlış həyəcan isə sadəcə yoxlayanın vaxtını alır.</p>
+  <div class="g3">
+    <div class="card stat">
+      <div class="mu" style="font-size:.85rem">Qarşısı alınan saxta ödəniş</div>
+      <b class="ok" style="margin:8px 0">+$654 000</b>
+      <span class="mu">109 tapılan saxta × $6,000 orta zərər</span>
+    </div>
+    <div class="card stat">
+      <div class="mu" style="font-size:.85rem">Əllə yoxlama xərci</div>
+      <b class="bad" style="margin:8px 0">-$64 920</b>
+      <span class="mu">541 yoxlanış × $120 əməkdaş vaxtı</span>
+    </div>
+    <div class="card stat" style="border-color:var(--ok)">
+      <div class="mu" style="font-size:.85rem">Xalis maliyyə qənaəti</div>
+      <b class="ok" style="margin:8px 0">+$589 080</b>
+      <span class="ok" style="font-weight:700">Təkcə test datasında qorunan məbləğ</span>
+    </div>
+  </div>
+  <div class="card"><p class="mu"><b>Nəticə:</b> Sistem öz əməliyyat xərcini 10 qat artıqlaması ilə ödəyir.</p></div>
+</div></section>
+
+<!-- SƏHNƏ 11: SHAP İzahı -->
+<section class="scene" data-title="İzah"><div class="in">
+  <h2>Model niyə “şübhəli” dedi? SHAP cavab verir</h2>
+  <p class="lead">SHAP hər amilin qərara təsirini göstərir. Aşağıda ən şübhəli sayılan test iddiasının göstəriciləri var.</p>
+  <div class="card"><div class="wf" id="wf"></div></div>
+  <div class="g2">
+    <div class="card">
+      <p class="bad" style="font-weight:800;margin-bottom:6px">Riski artıran amillər</p>
+      <p class="mu">Günahkar sığortalının özüdür. İddiadan 2-3 il əvvəl ünvan dəyişib. Franşiza yüksəkdir ($500+).</p>
+    </div>
+    <div class="card">
+      <p class="ok" style="font-weight:800;margin-bottom:6px">Riski azaldan amillər</p>
+      <p class="mu">Günahkar üçüncü tərəfdir. Sığorta növü Liability (yalnız başqasına dəyən ziyan).</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- SƏHNƏ 12: Sistem Arxitekturası -->
+<section class="scene" data-title="Sistem"><div class="in">
+  <h2>Hamısı bir yerdə necə işləyir</h2>
+  <div class="flow">
+    <div class="card"><b>1. Təlim & Analiz</b><p class="mu">Model öyrədilir və <code>models/</code> qovluğunda saxlanılır.</p></div>
+    <div class="card"><b>2. Streamlit UI</b><p class="mu">İddiaları fərdi və ya toplu (CSV) yoxlayan veb səhifə.</p></div>
+    <div class="card"><b>3. Git & GitHub</b><p class="mu">Kodun versiya nəzarəti və onlayn saxlanması.</p></div>
+    <div class="card"><b>4. Docker & Bulud</b><p class="mu">Hər kompüterdə və serverdə eyni cür xətasız işləyir.</p></div>
+  </div>
+  <div class="card">
+    <b>Məhdudiyyət və tövsiyə</b>
+    <p class="mu">Model yalnız keçmiş nümunələri bilir, yeni fırıldaqçılıq formalarını dərhal tanımaya bilər. Ona görə sistem ödənişi birbaşa rədd etmir, yoxlama komandasına növbəlilik təyin edir.</p>
+  </div>
+</div></section>
+
+<div class="nav">
+  <button id="prev" aria-label="Əvvəlki">◄</button>
+  <button id="next" aria-label="Növbəti">►</button>
+</div>
+
+<script>
+(()=>{
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], S = $$('.scene');
+let i = 0;
+
+S.forEach(s => [...s.firstElementChild.children].forEach((c, k) => c.style.setProperty('--k', k)));
+
+const prog = $('#prog');
+S.forEach((s, k) => {
+  const b = document.createElement('button');
+  b.className = 'seg';
+  b.setAttribute('aria-label', s.dataset.title);
+  b.onclick = () => go(k);
+  prog.append(b);
+});
+
+// Spotlight glow
+const glow = $('#glow');
+addEventListener('pointermove', e => {
+  glow.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+  const c = e.target.closest && e.target.closest('.card');
+  if (c) {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--x', (e.clientX - r.left) + 'px');
+    c.style.setProperty('--y', (e.clientY - r.top) + 'px');
+  }
+});
+
+// Network canvas
+const cv = $('#net'), cx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion:reduce)').matches;
+let W, H, P = [], col = '#3ddcc8';
+
+function rs() {
+  W = cv.width = innerWidth;
+  H = cv.height = innerHeight;
+  col = getComputedStyle(document.documentElement).getPropertyValue('--ok').trim() || col;
+  P = Array.from({ length: Math.round(W * H / 22000) }, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35
+  }));
+}
+
+function dr() {
+  cx.clearRect(0, 0, W, H);
+  cx.fillStyle = cx.strokeStyle = col;
+  for (const p of P) {
+    if (!still) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+    }
+    cx.globalAlpha = .5;
+    cx.beginPath();
+    cx.arc(p.x, p.y, 1.5, 0, 6.28);
+    cx.fill();
+  }
+  for (let a = 0; a < P.length; a++) {
+    for (let b = a + 1; b < P.length; b++) {
+      const d = Math.hypot(P[a].x - P[b].x, P[a].y - P[b].y);
+      if (d < 125) {
+        cx.globalAlpha = (1 - d / 125) * .2;
+        cx.beginPath();
+        cx.moveTo(P[a].x, P[a].y);
+        cx.lineTo(P[b].x, P[b].y);
+        cx.stroke();
+      }
+    }
+  }
+  if (!still) requestAnimationFrame(dr);
+}
+addEventListener('resize', () => { rs(); if (still) dr(); });
+rs(); dr();
+
+// 100 Dots (Scene 1)
+const dots = $('#dots'), FR = [7, 19, 34, 52, 68, 91];
+for (let k = 0; k < 100; k++) {
+  const d = document.createElement('i');
+  d.style.transitionDelay = (k * 14) + 'ms';
+  if (FR.includes(k)) d.className = 'f';
+  dots.append(d);
+}
+
+// Tree Simulator (Scene 6)
+let n = 0;
+const trees = $('#trees');
+function drawTrees() {
+  trees.innerHTML = '';
+  for (let k = 0; k < n; k++) {
+    const t = document.createElement('div');
+    t.className = 'tree';
+    t.style.height = (22 + ((k * 37) % 36)) + 'px';
+    if (k < n - 1) t.style.animation = 'none';
+    trees.append(t);
+  }
+  const e = Math.round(100 * Math.pow(.66, n));
+  $('#err').textContent = e;
+  $('#errbar').style.width = e + '%';
+}
+$('#addTree').onclick = () => { if (n < 12) { n++; drawTrees(); } };
+$('#resetTree').onclick = () => { n = 0; drawTrees(); };
+drawTrees();
+
+// Model Chart (Scene 7)
+const R = [
+  ['XGBoost + scale_pos_weight', .257, 1],
+  ['RandomForest + class_weight', .244],
+  ['RandomForest + SMOTE', .219],
+  ['Logistic (baseline)', .179],
+  ['Logistic + class_weight', .156]
+];
+$('#chart').innerHTML = '<p class="mu mono" style="font-size:.8rem;margin-bottom:6px">PR-AUC (yüksək yaxşıdır)</p>' +
+  R.map(r => `<div class="row"><span class="nm">${r[0]}${r[2] ? ' ✓' : ''}</span><div class="track ${r[2] ? 'win' : ''}"><i data-w="${r[1] / .3 * 100}"></i><b style="left:${.06 / .3 * 100}%"></b></div><span class="mono">${r[1].toFixed(3)}</span></div>`).join('');
+
+// Confusion Matrix (Scene 9)
+const TX = [
+  '2467 normal iddia düzgün buraxıldı: yoxlayanın vaxtı boşuna getmədi.',
+  '432 normal iddia şübhəli sayıldı. Bu, yanlış həyəcandır: əməkdaş yoxlayıb normal olduğunu təsdiqləyəcək.',
+  '76 saxta iddia qaçırıldı, model onları normal saydı. Bu, ən bahalı səhvdir.',
+  '109 saxta iddia tapıldı. Sistemin əsas faydası budur: 109 saxta ödənişin qarşısı alındı.'
+];
+function mx(k) {
+  $$('.cell').forEach(c => c.classList.toggle('sel', +c.dataset.k === k));
+  $('#mxText').textContent = TX[k];
+}
+$$('.cell').forEach(c => c.onclick = () => mx(+c.dataset.k));
+mx(3);
+
+// SHAP Waterfall (Scene 11)
+const W2 = [
+  ['Ünvan dəyişikliyi: 2-3 il əvvəl', 2.36],
+  ['Franşiza: 500', 1.18],
+  ['Yaş: 41', .3],
+  ['Sürücü reytinqi: 4', -.19]
+];
+$('#wf').innerHTML = W2.map(w => `<span>${w[0]}</span><div class="b" data-w="${Math.abs(w[1]) / 2.4 * 100}" style="background:${w[1] > 0 ? 'var(--bad)' : 'var(--ok)'}">${w[1] > 0 ? '+' : '−'}${Math.abs(w[1]).toFixed(2)}</div>`).join('');
+
+// Count-up Numbers
+function count() {
+  $$('.scene.on [data-n]').forEach(el => {
+    const to = +el.dataset.n, d = +(el.dataset.d || 0), t0 = performance.now();
+    const f = t => {
+      const p = Math.min(1, (t - t0) / 1400), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = (to * e).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('.', ',');
+      if (p < 1) requestAnimationFrame(f);
+    };
+    requestAnimationFrame(f);
+  });
+}
+
+// Scene Animation Triggers
+const enter = {
+  0() {
+    dots.classList.remove('go');
+    $$('.f').forEach(d => d.classList.remove('hit'));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      dots.classList.add('go');
+      setTimeout(() => $$('.f').forEach(d => d.classList.add('hit')), 1800);
+    }));
+  },
+  6() {
+    const t = $$('#chart .track i');
+    t.forEach(x => x.style.width = '0');
+    setTimeout(() => t.forEach(x => x.style.width = x.dataset.w + '%'), 120);
+  },
+  8() {
+    $$('.rf').forEach(c => c.style.strokeDashoffset = 264);
+    setTimeout(() => $$('.rf').forEach(c => c.style.strokeDashoffset = 264 * (1 - c.dataset.p)), 150);
+  },
+  10() {
+    const b = $$('#wf .b');
+    b.forEach(x => x.style.width = '0');
+    setTimeout(() => b.forEach(x => x.style.width = x.dataset.w + '%'), 150);
+  }
+};
+
+function go(k) {
+  i = Math.max(0, Math.min(S.length - 1, k));
+  S.forEach((s, j) => s.classList.toggle('on', j === i));
+  $$('.seg').forEach((b, j) => {
+    b.classList.toggle('done', j <= i);
+    b.classList.toggle('cur', j === i);
+  });
+  $('#cnt').textContent = (i + 1) + ' / ' + S.length;
+  $('#ttl').textContent = S[i].dataset.title;
+  $('#prev').disabled = i === 0;
+  $('#next').disabled = i === S.length - 1;
+  count();
+  if (enter[i]) enter[i]();
+}
+
+$('#prev').onclick = () => go(i - 1);
+$('#next').onclick = () => go(i + 1);
+
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') go(i + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(i - 1);
+});
+
+let x0 = null;
+addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+addEventListener('touchend', e => {
+  if (x0 === null) return;
+  const d = e.changedTouches[0].clientX - x0;
+  if (Math.abs(d) > 70) go(i + (d < 0 ? 1 : -1));
+  x0 = null;
+});
+
+go(0);
+})();
+</script>
+</body>
+</html>
